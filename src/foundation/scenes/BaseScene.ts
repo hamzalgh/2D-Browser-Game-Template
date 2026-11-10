@@ -69,7 +69,12 @@ export abstract class BaseScene extends Scene {
     const duration = options.duration ?? 250;
     const fadeColor = options.fadeColor ?? 0x050608;
 
-    this.cameras.main.fadeOut(duration, (fadeColor >> 16) & 0xff, (fadeColor >> 8) & 0xff, fadeColor & 0xff);
+    this.cameras.main.fadeOut(
+      duration,
+      (fadeColor >> 16) & 0xff,
+      (fadeColor >> 8) & 0xff,
+      fadeColor & 0xff
+    );
 
     this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
       this.scene.start(targetScene, options.data);

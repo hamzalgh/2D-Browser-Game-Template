@@ -7,8 +7,11 @@ import {
   GameScene,
   PauseScene,
   VictoryScene,
-  SceneManager
+  SceneManager,
+  SceneKey
 } from './foundation/scenes';
+import { ResponsiveManager } from './foundation/responsive';
+import { InputManager } from './foundation/input';
 
 export const gameConfig: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -32,8 +35,38 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
 
 export function initGame(): Phaser.Game {
   const game = new Phaser.Game(gameConfig);
+
+  // Initialize Foundation Managers
   SceneManager.getInstance().setGame(game);
+  ResponsiveManager.getInstance().setGame(game);
+
+  // Wire HTML UI Buttons
+  setupHTMLUIControls();
+
+  // Hook Gamepad polling into the Phaser game step
+  game.events.on(Phaser.Core.Events.STEP, () => {
+    InputManager.getInstance().updateGamepad();
+  });
+
   return game;
+}
+
+function setupHTMLUIControls(): void {
+  if (typeof document === 'undefined') return;
+
+  const fullscreenBtn = document.getElementById('ui-fullscreen-btn');
+  if (fullscreenBtn) {
+    fullscreenBtn.addEventListener('click', () => {
+      ResponsiveManager.getInstance().toggleFullscreen();
+    });
+  }
+
+  const settingsBtn = document.getElementById('ui-settings-btn');
+  if (settingsBtn) {
+    settingsBtn.addEventListener('click', () => {
+      SceneManager.getInstance().pushScene(SceneKey.Pause, { isSettingsOnly: true });
+    });
+  }
 }
 
 // Start game automatically when DOM is ready in browser

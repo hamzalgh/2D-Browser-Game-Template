@@ -35,10 +35,10 @@ export default defineConfig({
       }
     },
     {
-      name: 'Mobile Safari (Portrait - Orientation Check)',
+      name: 'Mobile Chrome (Portrait - Orientation Check)',
       use: {
-        ...devices['iPhone 14'],
-        viewport: { width: 390, height: 844 }
+        ...devices['Pixel 7'],
+        viewport: { width: 412, height: 915 }
       }
     }
   ],

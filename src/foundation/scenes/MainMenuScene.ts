@@ -23,11 +23,16 @@ export class MainMenuScene extends BaseScene {
     titleText.setOrigin(0.5, 0.5);
     titleText.setShadow(0, 0, '#06b6d4', 16, true, true);
 
-    const subText = this.add.text(width / 2, height * 0.36, '// SIGNAL CHAIN INFILTRATION PROTOCOL', {
-      fontFamily: 'monospace',
-      fontSize: '15px',
-      color: '#94a3b8'
-    });
+    const subText = this.add.text(
+      width / 2,
+      height * 0.36,
+      '// SIGNAL CHAIN INFILTRATION PROTOCOL',
+      {
+        fontFamily: 'monospace',
+        fontSize: '15px',
+        color: '#94a3b8'
+      }
+    );
     subText.setOrigin(0.5, 0.5);
 
     // Primary Action Buttons
@@ -44,11 +49,16 @@ export class MainMenuScene extends BaseScene {
     });
 
     // Version Footer
-    const verText = this.add.text(width / 2, height * 0.92, 'v1.0.0-foundation // CrazyGames & Y8 Ready', {
-      fontFamily: 'monospace',
-      fontSize: '12px',
-      color: '#475569'
-    });
+    const verText = this.add.text(
+      width / 2,
+      height * 0.92,
+      'v1.0.0-foundation // CrazyGames & Y8 Ready',
+      {
+        fontFamily: 'monospace',
+        fontSize: '12px',
+        color: '#475569'
+      }
+    );
     verText.setOrigin(0.5, 0.5);
   }
 
