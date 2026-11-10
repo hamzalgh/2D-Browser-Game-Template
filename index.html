@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <title>Neon Circuit Hacker Foundation</title>
+  </head>
+  <body class="bg-slate-950 text-slate-100 antialiased overflow-hidden select-none">
+    <div id="app" class="relative w-full h-full flex items-center justify-center">
+      <!-- Phaser Canvas Container -->
+      <div id="game-container" class="w-full h-full flex items-center justify-center"></div>
+
+      <!-- Responsive HTML UI Overlay Layer (Tailwind CSS v4) -->
+      <div
+        id="html-ui-overlay"
+        class="pointer-events-none absolute inset-0 z-20 flex flex-col justify-between"
+        style="
+          padding-top: var(--safe-area-top);
+          padding-bottom: var(--safe-area-bottom);
+          padding-left: var(--safe-area-left);
+          padding-right: var(--safe-area-right);
+        "
+      >
+        <!-- Top System Bar -->
+        <header
+          id="ui-top-bar"
+          class="pointer-events-auto flex items-center justify-between px-4 py-2 bg-slate-900/70 backdrop-blur-md border-b border-cyan-500/30 text-xs font-mono"
+        >
+          <div class="flex items-center gap-2">
+            <span class="inline-block w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
+            <span id="ui-game-title" class="font-bold tracking-wider text-cyan-300">
+              NEON CIRCUIT HACKER
+            </span>
+            <span
+              id="ui-platform-badge"
+              class="ml-2 px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700 uppercase text-[10px]"
+            >
+              Standalone
+            </span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <span id="ui-fps-counter" class="text-slate-400">FPS: --</span>
+            <button
+              id="ui-settings-btn"
+              class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 transition"
+              title="Settings"
+            >
+              ⚙
+            </button>
+            <button
+              id="ui-fullscreen-btn"
+              class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 transition"
+              title="Toggle Fullscreen"
+            >
+              ⛶
+            </button>
+          </div>
+        </header>
+
+        <!-- Dynamic Modal / Notification Slot -->
+        <main
+          id="ui-modal-container"
+          class="pointer-events-none flex-1 flex items-center justify-center p-4"
+        ></main>
+
+        <!-- Bottom Status Bar -->
+        <footer
+          id="ui-bottom-bar"
+          class="pointer-events-auto flex items-center justify-between px-4 py-1.5 bg-slate-900/70 backdrop-blur-md border-t border-slate-800 text-[11px] font-mono text-slate-400"
+        >
+          <div id="ui-status-text">SYSTEM INITIALIZED // WAITING FOR INPUT</div>
+          <div id="ui-viewport-info" class="text-right">1280x720 (16:9)</div>
+        </footer>
+      </div>
+
+      <!-- Mobile Orientation Warning (Shown when portrait orientation is detected) -->
+      <div
+        id="orientation-warning"
+        class="hidden fixed inset-0 z-50 bg-slate-950/95 flex flex-col items-center justify-center p-6 text-center"
+      >
+        <div class="w-16 h-16 mb-4 text-cyan-400 animate-bounce">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-3 18.75h3"
+            />
+          </svg>
+        </div>
+        <h2 class="text-lg font-bold font-mono text-cyan-300 mb-2">PLEASE ROTATE YOUR DEVICE</h2>
+        <p class="text-sm text-slate-400 max-w-xs font-mono">
+          Neon Circuit Hacker is engineered for landscape orientation. Rotate your device for
+          optimal gameplay.
+        </p>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
