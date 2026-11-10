@@ -1,3 +1,4 @@
+import Phaser from 'phaser';
 import { BaseScene } from './BaseScene';
 import { SceneKey } from './SceneKey';
 

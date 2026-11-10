@@ -1,3 +1,4 @@
+import Phaser from 'phaser';
 import { SceneKey, SceneDataPayload } from './SceneKey';
 import { AnalyticsManager, StandardAnalyticsEvent } from '../analytics';
 

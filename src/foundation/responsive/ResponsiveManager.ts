@@ -1,3 +1,4 @@
+import Phaser from 'phaser';
 import { DeviceOrientation, ViewportDimensions } from './Orientation';
 import { SafeAreaManager } from './SafeArea';
 
