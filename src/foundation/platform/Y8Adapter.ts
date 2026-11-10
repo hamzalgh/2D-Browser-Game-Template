@@ -39,7 +39,8 @@ export class Y8Adapter implements IPlatformAdapter {
   }
 
   public async showMidroll(): Promise<AdResult> {
-    const y8 = typeof window !== 'undefined' ? (window as unknown as { y8?: Y8Global }).y8 : undefined;
+    const y8 =
+      typeof window !== 'undefined' ? (window as unknown as { y8?: Y8Global }).y8 : undefined;
     if (!y8?.adBreak) {
       console.log('[Y8Adapter] adBreak API not found, simulating completed ad.');
       return { success: true, type: 'midroll' };
@@ -62,7 +63,8 @@ export class Y8Adapter implements IPlatformAdapter {
   }
 
   public async showRewarded(): Promise<RewardedAdResult> {
-    const y8 = typeof window !== 'undefined' ? (window as unknown as { y8?: Y8Global }).y8 : undefined;
+    const y8 =
+      typeof window !== 'undefined' ? (window as unknown as { y8?: Y8Global }).y8 : undefined;
     if (!y8?.adBreak) {
       console.log('[Y8Adapter] adBreak API not found, granting reward.');
       return { success: true, type: 'rewarded', rewardGranted: true };
@@ -89,12 +91,14 @@ export class Y8Adapter implements IPlatformAdapter {
   }
 
   public isUserAccountAvailable(): boolean {
-    const y8 = typeof window !== 'undefined' ? (window as unknown as { y8?: Y8Global }).y8 : undefined;
+    const y8 =
+      typeof window !== 'undefined' ? (window as unknown as { y8?: Y8Global }).y8 : undefined;
     return Boolean(y8?.user?.isLoggedIn && y8.user.isLoggedIn());
   }
 
   public async getUser(): Promise<PlatformUser | null> {
-    const y8 = typeof window !== 'undefined' ? (window as unknown as { y8?: Y8Global }).y8 : undefined;
+    const y8 =
+      typeof window !== 'undefined' ? (window as unknown as { y8?: Y8Global }).y8 : undefined;
     if (this.isUserAccountAvailable() && y8?.user) {
       return {
         id: y8.user.id || 'y8_user',

@@ -43,7 +43,10 @@ export class AnalyticsManager {
     return this.sessionId;
   }
 
-  public track(eventName: string | StandardAnalyticsEvent, params: AnalyticsEventParams = {}): void {
+  public track(
+    eventName: string | StandardAnalyticsEvent,
+    params: AnalyticsEventParams = {}
+  ): void {
     const enrichedParams: AnalyticsEventParams = {
       ...params,
       session_duration_s: Math.round((Date.now() - this.sessionStartTime) / 1000)
@@ -83,7 +86,10 @@ export class AnalyticsManager {
     });
   }
 
-  public trackAd(type: 'midroll' | 'rewarded', status: 'started' | 'completed' | 'failed' | 'skipped'): void {
+  public trackAd(
+    type: 'midroll' | 'rewarded',
+    status: 'started' | 'completed' | 'failed' | 'skipped'
+  ): void {
     const eventName =
       status === 'completed'
         ? StandardAnalyticsEvent.AdCompleted

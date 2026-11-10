@@ -38,7 +38,9 @@ export class CrazyGamesAdapter implements IPlatformAdapter {
   private isInitialized = false;
 
   constructor() {
-    this.isMock = typeof window === 'undefined' || !(window as unknown as { Crazygames?: { SDK: CrazyGamesSDK } }).Crazygames;
+    this.isMock =
+      typeof window === 'undefined' ||
+      !(window as unknown as { Crazygames?: { SDK: CrazyGamesSDK } }).Crazygames;
   }
 
   public async initialize(): Promise<void> {
@@ -117,7 +119,12 @@ export class CrazyGamesAdapter implements IPlatformAdapter {
           resolve({ success: true, type: 'rewarded', rewardGranted: true });
         },
         adError: err => {
-          resolve({ success: false, type: 'rewarded', rewardGranted: completed, error: String(err) });
+          resolve({
+            success: false,
+            type: 'rewarded',
+            rewardGranted: completed,
+            error: String(err)
+          });
         }
       }).catch(err => {
         resolve({ success: false, type: 'rewarded', rewardGranted: false, error: String(err) });

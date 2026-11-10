@@ -60,13 +60,21 @@ export class MockPlatformAdapter implements IPlatformAdapter {
 
   public async showRewarded(): Promise<RewardedAdResult> {
     if (this.isAdPlaying) {
-      return { success: false, type: 'rewarded', rewardGranted: false, error: 'Ad already playing' };
+      return {
+        success: false,
+        type: 'rewarded',
+        rewardGranted: false,
+        error: 'Ad already playing'
+      };
     }
 
     this.isAdPlaying = true;
     console.log('[MockPlatformAdapter] [AD] Simulating Rewarded Video Ad (2.0s)...');
 
-    const completed = await this.renderSimulatedAdModal('REWARDED VIDEO AD SIMULATION (HINT UNLOCK)', 2000);
+    const completed = await this.renderSimulatedAdModal(
+      'REWARDED VIDEO AD SIMULATION (HINT UNLOCK)',
+      2000
+    );
 
     this.isAdPlaying = false;
     return {
