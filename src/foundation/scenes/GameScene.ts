@@ -1,5 +1,6 @@
 import { BaseScene } from './BaseScene';
 import { SceneKey, SceneDataPayload } from './SceneKey';
+import { AudioManager } from '../audio';
 
 interface GridTile {
   x: number;
@@ -186,6 +187,7 @@ export class GameScene extends BaseScene {
     if (this.isPulseRunning) return;
 
     tile.rotation = (tile.rotation + 90) % 360;
+    AudioManager.getInstance().playSfx('rotate');
     this.tweens.add({
       targets: tile.container,
       angle: tile.rotation,
@@ -223,6 +225,7 @@ export class GameScene extends BaseScene {
   private fireSignalPulse(): void {
     if (this.isPulseRunning) return;
     this.isPulseRunning = true;
+    AudioManager.getInstance().playSfx('pulse');
 
     if (this.pulseObject) {
       this.pulseObject.destroy();
@@ -247,6 +250,7 @@ export class GameScene extends BaseScene {
         this.isPulseRunning = false;
 
         // Trigger victory modal after pulse successfully breaches terminal
+        AudioManager.getInstance().playSfx('victory');
         this.time.delayedCall(200, () => {
           this.openOverlay(SceneKey.Victory, {
             level: this.currentLevel,

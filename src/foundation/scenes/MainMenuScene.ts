@@ -1,5 +1,6 @@
 import { BaseScene } from './BaseScene';
 import { SceneKey } from './SceneKey';
+import { AudioManager } from '../audio';
 
 export class MainMenuScene extends BaseScene {
   constructor() {
@@ -111,6 +112,7 @@ export class MainMenuScene extends BaseScene {
 
     btnContainer.on('pointerdown', () => {
       this.input.setDefaultCursor('default');
+      AudioManager.getInstance().playSfx('click');
       onClick();
     });
   }
