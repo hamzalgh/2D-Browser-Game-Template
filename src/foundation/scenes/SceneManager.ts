@@ -1,4 +1,5 @@
 import { SceneKey, SceneDataPayload } from './SceneKey';
+import { AnalyticsManager, StandardAnalyticsEvent } from '../analytics';
 
 export type SceneChangeCallback = (currentScene: string, previousScene: string | null) => void;
 
@@ -111,6 +112,11 @@ export class SceneManager {
   }
 
   private notifyListeners(current: string, previous: string | null): void {
+    AnalyticsManager.getInstance().track(StandardAnalyticsEvent.SceneChange, {
+      from: previous,
+      to: current
+    });
+
     for (const listener of this.listeners) {
       try {
         listener(current, previous);
