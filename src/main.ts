@@ -12,6 +12,8 @@ import {
 } from './foundation/scenes';
 import { ResponsiveManager } from './foundation/responsive';
 import { InputManager } from './foundation/input';
+import { StorageManager } from './foundation/storage';
+import { PlatformManager } from './foundation/platform';
 
 export const gameConfig: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
@@ -33,10 +35,12 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
   scene: [BootScene, PreloaderScene, MainMenuScene, GameScene, PauseScene, VictoryScene]
 };
 
-export function initGame(): Phaser.Game {
-  const game = new Phaser.Game(gameConfig);
-
+export async function initGame(): Promise<Phaser.Game> {
   // Initialize Foundation Managers
+  await StorageManager.getInstance().initialize();
+  await PlatformManager.getInstance().initialize();
+
+  const game = new Phaser.Game(gameConfig);
   SceneManager.getInstance().setGame(game);
   ResponsiveManager.getInstance().setGame(game);
 
@@ -72,6 +76,6 @@ function setupHTMLUIControls(): void {
 // Start game automatically when DOM is ready in browser
 if (typeof window !== 'undefined') {
   window.addEventListener('DOMContentLoaded', () => {
-    initGame();
+    initGame().catch(err => console.error('Failed to init game:', err));
   });
 }

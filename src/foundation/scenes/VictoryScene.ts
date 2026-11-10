@@ -1,5 +1,6 @@
 import { BaseScene } from './BaseScene';
 import { SceneKey, SceneDataPayload } from './SceneKey';
+import { PlatformManager } from '../platform';
 
 export class VictoryScene extends BaseScene {
   private level = 1;
@@ -82,9 +83,14 @@ export class VictoryScene extends BaseScene {
     }
 
     // Action buttons
-    this.createActionButton(modalX, modalY + 80, 'NEXT SUBNET [ENTER]', 0x10b981, () => {
+    const proceedToNext = async () => {
       this.closeOverlay();
+      await PlatformManager.getInstance().showMidroll();
       this.scene.get(SceneKey.Game).scene.restart({ level: this.level + 1 });
+    };
+
+    this.createActionButton(modalX, modalY + 80, 'NEXT SUBNET [ENTER]', 0x10b981, () => {
+      proceedToNext();
     });
 
     this.createActionButton(modalX, modalY + 130, 'MAIN MENU', 0x475569, () => {
@@ -94,8 +100,7 @@ export class VictoryScene extends BaseScene {
     });
 
     this.input.keyboard?.once('keydown-ENTER', () => {
-      this.closeOverlay();
-      this.scene.get(SceneKey.Game).scene.restart({ level: this.level + 1 });
+      proceedToNext();
     });
   }
 

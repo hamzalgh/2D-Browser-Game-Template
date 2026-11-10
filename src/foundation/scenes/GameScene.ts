@@ -1,6 +1,7 @@
 import { BaseScene } from './BaseScene';
 import { SceneKey, SceneDataPayload } from './SceneKey';
 import { AudioManager } from '../audio';
+import { PlatformManager } from '../platform';
 
 interface GridTile {
   x: number;
@@ -47,6 +48,12 @@ export class GameScene extends BaseScene {
     if (statusEl) {
       statusEl.textContent = `SUBNET ${this.currentLevel} ACTIVE // TAP NODES TO ROUTE SIGNALS`;
     }
+
+    PlatformManager.getInstance().gameplayStart();
+  }
+
+  protected onDestroy(): void {
+    PlatformManager.getInstance().gameplayStop();
   }
 
   protected onUpdate(_time: number, _delta: number): void {
@@ -208,18 +215,35 @@ export class GameScene extends BaseScene {
     const bottomY = height - 50;
 
     // Fire Pulse Button
-    this.createActionButton(width / 2 - 140, bottomY, 'EXECUTE PULSE [SPACE]', 0x059669, () => {
+    this.createActionButton(width / 2 - 240, bottomY, 'EXECUTE PULSE [SPACE]', 0x059669, () => {
       this.fireSignalPulse();
     });
 
+    // Rewarded Hint Button
+    this.createActionButton(width / 2, bottomY, 'TRACE HINT [H]', 0xd97706, () => {
+      this.requestRewardedHint();
+    });
+
     // Pause Button
-    this.createActionButton(width / 2 + 140, bottomY, 'PAUSE / MENU [ESC]', 0x475569, () => {
+    this.createActionButton(width / 2 + 240, bottomY, 'PAUSE / MENU [ESC]', 0x475569, () => {
       this.openOverlay(SceneKey.Pause);
     });
 
     // Keyboard Hotkeys
     this.input.keyboard?.on('keydown-SPACE', () => this.fireSignalPulse());
+    this.input.keyboard?.on('keydown-H', () => this.requestRewardedHint());
     this.input.keyboard?.on('keydown-ESC', () => this.openOverlay(SceneKey.Pause));
+  }
+
+  private async requestRewardedHint(): Promise<void> {
+    const result = await PlatformManager.getInstance().showRewarded();
+    if (result.rewardGranted) {
+      AudioManager.getInstance().playSfx('connect');
+      const statusEl = document.getElementById('ui-status-text');
+      if (statusEl) {
+        statusEl.textContent = 'TRACE ROUTE UNLOCKED: ALIGN FIRST ROW TILES HORIZONTALLY';
+      }
+    }
   }
 
   private fireSignalPulse(): void {
