@@ -133,16 +133,11 @@ export class GameScene extends BaseScene {
         this.drawTileGraphic(bg, posX, posY, false, false);
 
         // Text icon in center of tile
-        const icon = this.add.text(
-          posX + this.tileSize / 2,
-          posY + this.tileSize / 2,
-          '◈',
-          {
-            fontFamily: 'monospace',
-            fontSize: '22px',
-            color: '#64748b'
-          }
-        );
+        const icon = this.add.text(posX + this.tileSize / 2, posY + this.tileSize / 2, '◈', {
+          fontFamily: 'monospace',
+          fontSize: '22px',
+          color: '#64748b'
+        });
         icon.setOrigin(0.5, 0.5);
 
         // Invisible precise zone for input hit-testing

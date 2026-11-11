@@ -50,16 +50,11 @@ export class MainMenuScene extends BaseScene {
     });
 
     // Version Footer
-    const verText = this.add.text(
-      width / 2,
-      height * 0.92,
-      'v0.1.0 // CrazyGames & Y8 Ready',
-      {
-        fontFamily: 'monospace',
-        fontSize: '12px',
-        color: '#475569'
-      }
-    );
+    const verText = this.add.text(width / 2, height * 0.92, 'v0.1.0 // CrazyGames & Y8 Ready', {
+      fontFamily: 'monospace',
+      fontSize: '12px',
+      color: '#475569'
+    });
     verText.setOrigin(0.5, 0.5);
   }
 

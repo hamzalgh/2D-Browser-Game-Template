@@ -11,6 +11,7 @@
 This repository is an **already complete, production-ready, reusable 2D browser game foundation/template** built with **Phaser 4**, **TypeScript**, **Vite**, **Tailwind CSS v4**, and **pnpm**.
 
 When you are asked to build, modify, or extend a game on top of this repository:
+
 - **DO NOT rebuild the core infrastructure.** Reuse the existing foundation managers under `src/foundation/`.
 - **DO NOT install redundant UI frameworks** (like React, Vue, or Bootstrap). The hybrid architecture uses Phaser 4 for canvas rendering and vanilla Tailwind CSS v4 HTML overlays for HUD/modals.
 - **Maintain platform neutrality**: Keep platform-specific logic inside `PlatformManager` / adapter classes (`CrazyGamesAdapter`, `Y8Adapter`, `MockPlatformAdapter`).
@@ -62,6 +63,7 @@ src/
 ## 🎯 Critical Conventions & Patterns
 
 ### 1. Interactive Objects & Hit-Testing in Phaser 4
+
 - Phaser 4 Containers calculate `displayOriginX / displayOriginY` as `width * 0.5` and `height * 0.5`. **Never** use negative offset hit areas like `new Phaser.Geom.Rectangle(-w/2, -h/2, w, h)` on scaled containers, as it causes inaccurate hit testing under canvas `FIT` mode.
 - **Recommended practice for hit-testing**:
   - Use `scene.add.zone(x, y, w, h).setOrigin(0, 0).setInteractive({ useHandCursor: true })` for precise, pixel-exact clickable regions.
@@ -69,16 +71,19 @@ src/
   - When re-animating objects on rapid clicks/double-clicks, kill in-flight tweens (`this.tweens.killTweensOf(target)`) and reset scale (`setScale(1)`) so animations never freeze.
 
 ### 2. Scene Lifecycle & Modals
+
 - Extend [`BaseScene`](file:///src/foundation/scenes/BaseScene.ts) for all game scenes.
 - Use `this.transitionTo(SceneKey.Target, { data })` for smooth camera fade transitions.
 - Use `this.openOverlay(SceneKey.Pause, { data })` and `this.closeOverlay()` for non-destructive modal stack layers (pause, settings, rewards, victory).
 
 ### 3. Ads & Portal Monetization
+
 - **Midroll (Interstitials)**: Call `await PlatformManager.getInstance().showMidroll()`.
 - **Rewarded Ads**: Call `const result = await PlatformManager.getInstance().showRewarded(); if (result.rewardGranted) { ... }`.
 - **Gameplay Tracking**: Ensure `gameplayStart()` and `gameplayStop()` are called on level enter/exit.
 
 ### 4. Audio
+
 - Use `AudioManager.getInstance().playSfx('click' | 'rotate' | 'pulse' | 'connect' | 'error' | 'victory')`.
 - Procedural audio is generated via `SynthAudioGenerator` (WebAudio oscillators) without needing external audio files.
 
@@ -105,6 +110,7 @@ pnpm build
 ---
 
 ## 🌐 Local Dev Server Ports & Parameters
+
 - **Dev Server**: `http://localhost:3000`
 - **Platform Mock Query Param**: `http://localhost:3000/?mock=true`
 - **CrazyGames Mode**: `http://localhost:3000/?platform=crazygames`
