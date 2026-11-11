@@ -32,7 +32,7 @@ export class PreloaderScene extends BaseScene {
     this.progressBar = this.add.graphics();
 
     // Loading title
-    this.loadingText = this.add.text(width / 2, height / 2 - 50, 'INITIALIZING NEON KERNEL...', {
+    this.loadingText = this.add.text(width / 2, height / 2 - 50, 'INITIALIZING SYSTEM...', {
       fontFamily: 'monospace',
       fontSize: '16px',
       color: '#38bdf8'

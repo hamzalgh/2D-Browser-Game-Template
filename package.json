@@ -1,7 +1,7 @@
 {
-  "name": "neon-circuit-hacker-foundation",
-  "version": "1.0.0",
-  "description": "Production-ready reusable 2D browser game foundation built with Phaser 4, TypeScript, Vite, and Tailwind CSS v4 for CrazyGames and Y8.",
+  "name": "2d-game-starter",
+  "version": "0.1.0",
+  "description": "2D Game Starter Release v0.1.0 - Production-ready, reusable 2D browser game foundation built with Phaser 4, TypeScript, Vite, Tailwind CSS v4, and pnpm for CrazyGames and Y8.",
   "private": true,
   "type": "module",
   "scripts": {

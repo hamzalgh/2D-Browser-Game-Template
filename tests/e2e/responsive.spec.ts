@@ -5,13 +5,13 @@ test.describe('Responsive Foundation & Viewport Tests', () => {
     await page.goto('/');
 
     // Check title and canvas container
-    await expect(page).toHaveTitle(/Neon Circuit Hacker Foundation/);
+    await expect(page).toHaveTitle(/2D Game Starter Release v0.1.0/);
     const canvasContainer = page.locator('#game-container');
     await expect(canvasContainer).toBeVisible();
 
     // Verify HTML overlay header
     const titleEl = page.locator('#ui-game-title');
-    await expect(titleEl).toHaveText(/NEON CIRCUIT HACKER/);
+    await expect(titleEl).toHaveText(/2D GAME STARTER/);
 
     const platformBadge = page.locator('#ui-platform-badge');
     await expect(platformBadge).toBeVisible();

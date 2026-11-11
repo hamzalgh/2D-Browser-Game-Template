@@ -5,27 +5,26 @@ import { AudioManager } from '../audio';
 import { PlatformManager } from '../platform';
 
 interface GridTile {
-  x: number;
-  y: number;
   col: number;
   row: number;
-  type: 'empty' | 'wire' | 'inverter' | 'splitter' | 'terminal';
-  rotation: number; // 0, 90, 180, 270
-  container: Phaser.GameObjects.Container;
-  glowGraphic: Phaser.GameObjects.Graphics;
+  active: boolean;
+  background: Phaser.GameObjects.Graphics;
+  icon: Phaser.GameObjects.Text;
 }
 
 export class GameScene extends BaseScene {
   private currentLevel = 1;
-  private gridCols = 6;
-  private gridRows = 4;
-  private tileSize = 72;
+  private readonly gridCols = 5;
+  private readonly gridRows = 4;
+  private readonly tileSize = 84;
+  private readonly tileGap = 12;
   private gridStartX = 0;
   private gridStartY = 0;
   private tiles: GridTile[][] = [];
-  private pulseObject: Phaser.GameObjects.Arc | null = null;
-  private isPulseRunning = false;
+  private score = 0;
+  private targetScore = 20;
   private movesCount = 0;
+  private isProcessing = false;
 
   constructor() {
     super(SceneKey.Game);
@@ -34,6 +33,9 @@ export class GameScene extends BaseScene {
   protected onInit(data: SceneDataPayload): void {
     this.currentLevel = typeof data.level === 'number' ? data.level : 1;
     this.movesCount = 0;
+    this.score = 0;
+    this.targetScore = this.gridCols * this.gridRows; // 20 tiles to clear/activate
+    this.isProcessing = false;
   }
 
   protected onCreate(): void {
@@ -41,14 +43,10 @@ export class GameScene extends BaseScene {
     const height = this.cameras.main.height;
 
     this.createBoardFrame(width, height);
-    this.createCircuitGrid(width, height);
+    this.createTileGrid(width, height);
     this.createControls(width, height);
 
-    // Update HTML overlay status if present
-    const statusEl = document.getElementById('ui-status-text');
-    if (statusEl) {
-      statusEl.textContent = `SUBNET ${this.currentLevel} ACTIVE // TAP NODES TO ROUTE SIGNALS`;
-    }
+    this.updateHUD();
 
     PlatformManager.getInstance().gameplayStart();
   }
@@ -58,7 +56,6 @@ export class GameScene extends BaseScene {
   }
 
   protected onUpdate(_time: number, _delta: number): void {
-    // Keep FPS counter updated in HTML UI
     const fpsEl = document.getElementById('ui-fps-counter');
     if (fpsEl && this.game.loop) {
       fpsEl.textContent = `FPS: ${Math.round(this.game.loop.actualFps)}`;
@@ -70,120 +67,108 @@ export class GameScene extends BaseScene {
     bg.fillStyle(0x07090e, 1);
     bg.fillRect(0, 0, width, height);
 
-    // Subtle PCB matrix grid
-    bg.lineStyle(1, 0x0f1f38, 0.5);
-    for (let x = 0; x <= width; x += 36) {
+    // Subtle background grid
+    bg.lineStyle(1, 0x0f1f38, 0.4);
+    for (let x = 0; x <= width; x += 40) {
       bg.moveTo(x, 0);
       bg.lineTo(x, height);
     }
-    for (let y = 0; y <= height; y += 36) {
+    for (let y = 0; y <= height; y += 40) {
       bg.moveTo(0, y);
       bg.lineTo(width, y);
     }
     bg.strokePath();
 
-    // Breadboard chassis border
-    const chassisWidth = this.gridCols * this.tileSize + 48;
-    const chassisHeight = this.gridRows * this.tileSize + 48;
-    this.gridStartX = (width - this.gridCols * this.tileSize) / 2;
-    this.gridStartY = (height - this.gridRows * this.tileSize) / 2 - 10;
+    const totalGridWidth = this.gridCols * this.tileSize + (this.gridCols - 1) * this.tileGap;
+    const totalGridHeight = this.gridRows * this.tileSize + (this.gridRows - 1) * this.tileGap;
+    this.gridStartX = (width - totalGridWidth) / 2;
+    this.gridStartY = (height - totalGridHeight) / 2 - 20;
 
-    const chassis = this.add.graphics();
-    chassis.lineStyle(2, 0x0284c7, 0.6);
-    chassis.strokeRoundedRect(
+    // Outer frame card
+    const frame = this.add.graphics();
+    frame.fillStyle(0x0b1120, 0.95);
+    frame.fillRoundedRect(
       this.gridStartX - 24,
       this.gridStartY - 24,
-      chassisWidth,
-      chassisHeight,
+      totalGridWidth + 48,
+      totalGridHeight + 48,
       12
     );
-    chassis.fillStyle(0x0b1120, 0.9);
-    chassis.fillRoundedRect(
+    frame.lineStyle(2, 0x0284c7, 0.6);
+    frame.strokeRoundedRect(
       this.gridStartX - 24,
       this.gridStartY - 24,
-      chassisWidth,
-      chassisHeight,
+      totalGridWidth + 48,
+      totalGridHeight + 48,
       12
     );
 
-    // Header label
+    // Top status line in scene
     this.add
       .text(
         this.gridStartX,
-        this.gridStartY - 46,
-        `MAINFRAME SUB-CLUSTER 0x0${this.currentLevel} // MOVE COUNT: ${this.movesCount}`,
+        this.gridStartY - 48,
+        `LEVEL ${this.currentLevel}  |  MOVES: 0  |  ACTIVE: 0 / ${this.targetScore}`,
         {
           fontFamily: 'monospace',
-          fontSize: '13px',
+          fontSize: '14px',
+          fontStyle: 'bold',
           color: '#38bdf8'
         }
       )
-      .setName('moveLabel');
+      .setName('hudLabel');
   }
 
-  private createCircuitGrid(_width: number, _height: number): void {
+  private createTileGrid(_width: number, _height: number): void {
     this.tiles = [];
 
     for (let c = 0; c < this.gridCols; c++) {
       this.tiles[c] = [];
       for (let r = 0; r < this.gridRows; r++) {
-        const posX = this.gridStartX + c * this.tileSize + this.tileSize / 2;
-        const posY = this.gridStartY + r * this.tileSize + this.tileSize / 2;
+        const posX = this.gridStartX + c * (this.tileSize + this.tileGap);
+        const posY = this.gridStartY + r * (this.tileSize + this.tileGap);
 
-        const container = this.add.container(posX, posY);
+        // Graphics background for visual feedback
+        const bg = this.add.graphics();
+        this.drawTileGraphic(bg, posX, posY, false, false);
 
-        const glowGraphic = this.add.graphics();
-        glowGraphic.fillStyle(0x0f172a, 0.7);
-        glowGraphic.fillRoundedRect(
-          -this.tileSize / 2 + 3,
-          -this.tileSize / 2 + 3,
-          this.tileSize - 6,
-          this.tileSize - 6,
-          6
+        // Text icon in center of tile
+        const icon = this.add.text(
+          posX + this.tileSize / 2,
+          posY + this.tileSize / 2,
+          '◈',
+          {
+            fontFamily: 'monospace',
+            fontSize: '22px',
+            color: '#64748b'
+          }
         );
-        glowGraphic.lineStyle(1.5, 0x1e293b, 0.8);
-        glowGraphic.strokeRoundedRect(
-          -this.tileSize / 2 + 3,
-          -this.tileSize / 2 + 3,
-          this.tileSize - 6,
-          this.tileSize - 6,
-          6
-        );
+        icon.setOrigin(0.5, 0.5);
 
-        // Draw wire glyph
-        const wireGraphic = this.add.graphics();
-        wireGraphic.lineStyle(4, 0x06b6d4, 0.9);
-        wireGraphic.moveTo(0, -this.tileSize / 2 + 10);
-        wireGraphic.lineTo(0, this.tileSize / 2 - 10);
-        wireGraphic.strokePath();
-
-        container.add([glowGraphic, wireGraphic]);
-        container.setSize(this.tileSize, this.tileSize);
-        container.setInteractive(
-          new Phaser.Geom.Rectangle(
-            -this.tileSize / 2,
-            -this.tileSize / 2,
-            this.tileSize,
-            this.tileSize
-          ),
-          Phaser.Geom.Rectangle.Contains
-        );
+        // Invisible precise zone for input hit-testing
+        // Origin (0,0) makes it match posX, posY directly with exact dimensions
+        const zone = this.add.zone(posX, posY, this.tileSize, this.tileSize);
+        zone.setOrigin(0, 0);
+        zone.setInteractive({ useHandCursor: true });
 
         const tile: GridTile = {
-          x: posX,
-          y: posY,
           col: c,
           row: r,
-          type: 'wire',
-          rotation: (c + r) % 2 === 0 ? 0 : 90,
-          container,
-          glowGraphic
+          active: false,
+          background: bg,
+          icon
         };
 
-        container.setAngle(tile.rotation);
+        zone.on('pointerover', () => {
+          this.drawTileGraphic(tile.background, posX, posY, tile.active, true);
+        });
 
-        container.on('pointerdown', () => {
-          this.rotateTile(tile);
+        zone.on('pointerout', () => {
+          this.drawTileGraphic(tile.background, posX, posY, tile.active, false);
+        });
+
+        zone.on('pointerdown', () => {
+          this.onTileClicked(tile, posX, posY);
         });
 
         this.tiles[c][r] = tile;
@@ -191,99 +176,180 @@ export class GameScene extends BaseScene {
     }
   }
 
-  private rotateTile(tile: GridTile): void {
-    if (this.isPulseRunning) return;
+  private drawTileGraphic(
+    g: Phaser.GameObjects.Graphics,
+    x: number,
+    y: number,
+    active: boolean,
+    hovered: boolean
+  ): void {
+    g.clear();
+    const radius = 8;
 
-    tile.rotation = (tile.rotation + 90) % 360;
-    AudioManager.getInstance().playSfx('rotate');
-    this.tweens.add({
-      targets: tile.container,
-      angle: tile.rotation,
-      duration: 160,
-      ease: 'Cubic.easeOut'
-    });
-
-    this.movesCount++;
-    const moveLabel = this.children.getByName('moveLabel') as Phaser.GameObjects.Text;
-    if (moveLabel) {
-      moveLabel.setText(
-        `MAINFRAME SUB-CLUSTER 0x0${this.currentLevel} // MOVE COUNT: ${this.movesCount}`
-      );
+    if (active) {
+      g.fillStyle(hovered ? 0x0284c7 : 0x0369a1, 0.85);
+      g.fillRoundedRect(x, y, this.tileSize, this.tileSize, radius);
+      g.lineStyle(2, 0x38bdf8, 1);
+      g.strokeRoundedRect(x, y, this.tileSize, this.tileSize, radius);
+    } else {
+      g.fillStyle(hovered ? 0x1e293b : 0x0f172a, 0.75);
+      g.fillRoundedRect(x, y, this.tileSize, this.tileSize, radius);
+      g.lineStyle(1.5, hovered ? 0x38bdf8 : 0x1e293b, 0.85);
+      g.strokeRoundedRect(x, y, this.tileSize, this.tileSize, radius);
     }
   }
 
-  private createControls(width: number, height: number): void {
-    const bottomY = height - 50;
+  private onTileClicked(tile: GridTile, x: number, y: number): void {
+    if (this.isProcessing) return;
 
-    // Fire Pulse Button
-    this.createActionButton(width / 2 - 240, bottomY, 'EXECUTE PULSE [SPACE]', 0x059669, () => {
-      this.fireSignalPulse();
+    tile.active = !tile.active;
+    this.movesCount++;
+
+    if (tile.active) {
+      AudioManager.getInstance().playSfx('connect');
+      tile.icon.setText('✦');
+      tile.icon.setColor('#f0fdf4');
+      this.score++;
+    } else {
+      AudioManager.getInstance().playSfx('rotate');
+      tile.icon.setText('◈');
+      tile.icon.setColor('#64748b');
+      this.score = Math.max(0, this.score - 1);
+    }
+
+    this.drawTileGraphic(tile.background, x, y, tile.active, true);
+
+    // Subtle scale pop on click: reset scale and kill existing tween so rapid double clicks always bounce
+    this.tweens.killTweensOf(tile.icon);
+    tile.icon.setScale(1);
+    this.tweens.add({
+      targets: tile.icon,
+      scaleX: 1.3,
+      scaleY: 1.3,
+      yoyo: true,
+      duration: 120,
+      ease: 'Back.easeOut',
+      onComplete: () => {
+        tile.icon.setScale(1);
+      }
     });
 
-    // Rewarded Hint Button
-    this.createActionButton(width / 2, bottomY, 'TRACE HINT [H]', 0xd97706, () => {
+    this.updateHUD();
+
+    if (this.score >= this.targetScore) {
+      this.triggerVictory();
+    }
+  }
+
+  private updateHUD(): void {
+    const hudLabel = this.children.getByName('hudLabel') as Phaser.GameObjects.Text;
+    if (hudLabel) {
+      hudLabel.setText(
+        `LEVEL ${this.currentLevel}  |  MOVES: ${this.movesCount}  |  ACTIVE: ${this.score} / ${this.targetScore}`
+      );
+    }
+
+    const statusEl = document.getElementById('ui-status-text');
+    if (statusEl) {
+      statusEl.textContent = `LEVEL ${this.currentLevel} // ACTIVATE ALL TILES TO WIN (${this.score}/${this.targetScore})`;
+    }
+  }
+
+  private triggerVictory(): void {
+    if (this.isProcessing) return;
+    this.isProcessing = true;
+
+    AudioManager.getInstance().playSfx('victory');
+
+    this.time.delayedCall(400, () => {
+      this.openOverlay(SceneKey.Victory, {
+        level: this.currentLevel,
+        moves: this.movesCount
+      });
+    });
+  }
+
+  private createControls(width: number, height: number): void {
+    const bottomY = height - 52;
+
+    // Hint Button (Rewarded Ad flow)
+    this.createActionButton(width / 2 - 240, bottomY, 'REWARDED HINT [H]', 0xd97706, () => {
       this.requestRewardedHint();
     });
 
-    // Pause Button
+    // Auto-Solve / Reset Button
+    this.createActionButton(width / 2, bottomY, 'AUTO-SOLVE [SPACE]', 0x059669, () => {
+      this.solveBoard();
+    });
+
+    // Pause / Settings Button
     this.createActionButton(width / 2 + 240, bottomY, 'PAUSE / MENU [ESC]', 0x475569, () => {
       this.openOverlay(SceneKey.Pause);
     });
 
     // Keyboard Hotkeys
-    this.input.keyboard?.on('keydown-SPACE', () => this.fireSignalPulse());
+    this.input.keyboard?.on('keydown-SPACE', () => this.solveBoard());
     this.input.keyboard?.on('keydown-H', () => this.requestRewardedHint());
     this.input.keyboard?.on('keydown-ESC', () => this.openOverlay(SceneKey.Pause));
+  }
+
+  private solveBoard(): void {
+    if (this.isProcessing) return;
+
+    for (let c = 0; c < this.gridCols; c++) {
+      for (let r = 0; r < this.gridRows; r++) {
+        const tile = this.tiles[c][r];
+        if (!tile.active) {
+          tile.active = true;
+          tile.icon.setText('✦');
+          tile.icon.setColor('#f0fdf4');
+          const posX = this.gridStartX + c * (this.tileSize + this.tileGap);
+          const posY = this.gridStartY + r * (this.tileSize + this.tileGap);
+          this.drawTileGraphic(tile.background, posX, posY, true, false);
+        }
+      }
+    }
+
+    this.score = this.targetScore;
+    this.movesCount++;
+    this.updateHUD();
+    this.triggerVictory();
   }
 
   private async requestRewardedHint(): Promise<void> {
     const result = await PlatformManager.getInstance().showRewarded();
     if (result.rewardGranted) {
       AudioManager.getInstance().playSfx('connect');
+
+      // Activate up to 4 remaining tiles as hint reward
+      let activated = 0;
+      for (let c = 0; c < this.gridCols && activated < 4; c++) {
+        for (let r = 0; r < this.gridRows && activated < 4; r++) {
+          const tile = this.tiles[c][r];
+          if (!tile.active) {
+            tile.active = true;
+            tile.icon.setText('✦');
+            tile.icon.setColor('#f0fdf4');
+            const posX = this.gridStartX + c * (this.tileSize + this.tileGap);
+            const posY = this.gridStartY + r * (this.tileSize + this.tileGap);
+            this.drawTileGraphic(tile.background, posX, posY, true, false);
+            this.score++;
+            activated++;
+          }
+        }
+      }
+
+      this.updateHUD();
+
       const statusEl = document.getElementById('ui-status-text');
       if (statusEl) {
-        statusEl.textContent = 'TRACE ROUTE UNLOCKED: ALIGN FIRST ROW TILES HORIZONTALLY';
+        statusEl.textContent = `HINT APPLIED: ${activated} TILES ACTIVATED!`;
+      }
+
+      if (this.score >= this.targetScore) {
+        this.triggerVictory();
       }
     }
-  }
-
-  private fireSignalPulse(): void {
-    if (this.isPulseRunning) return;
-    this.isPulseRunning = true;
-    AudioManager.getInstance().playSfx('pulse');
-
-    if (this.pulseObject) {
-      this.pulseObject.destroy();
-    }
-
-    const startX = this.gridStartX - 30;
-    const startY = this.gridStartY + this.tileSize / 2;
-    const endX = this.gridStartX + this.gridCols * this.tileSize + 30;
-
-    this.pulseObject = this.add.circle(startX, startY, 7, 0x38bdf8);
-    this.pulseObject.setStrokeStyle(2, 0xe0f2fe);
-
-    // Pulse animation across the circuit
-    this.tweens.add({
-      targets: this.pulseObject,
-      x: endX,
-      duration: 1200,
-      ease: 'Linear',
-      onComplete: () => {
-        this.pulseObject?.destroy();
-        this.pulseObject = null;
-        this.isPulseRunning = false;
-
-        // Trigger victory modal after pulse successfully breaches terminal
-        AudioManager.getInstance().playSfx('victory');
-        this.time.delayedCall(200, () => {
-          this.openOverlay(SceneKey.Victory, {
-            level: this.currentLevel,
-            moves: this.movesCount
-          });
-        });
-      }
-    });
   }
 
   private createActionButton(
@@ -293,17 +359,16 @@ export class GameScene extends BaseScene {
     accentColor: number,
     onClick: () => void
   ): void {
-    const btn = this.add.container(x, y);
     const w = 220;
-    const h = 36;
+    const h = 40;
 
     const bg = this.add.graphics();
     bg.fillStyle(0x0f172a, 0.9);
-    bg.fillRoundedRect(-w / 2, -h / 2, w, h, 6);
+    bg.fillRoundedRect(x - w / 2, y - h / 2, w, h, 6);
     bg.lineStyle(1.5, accentColor, 0.9);
-    bg.strokeRoundedRect(-w / 2, -h / 2, w, h, 6);
+    bg.strokeRoundedRect(x - w / 2, y - h / 2, w, h, 6);
 
-    const label = this.add.text(0, 0, text, {
+    const label = this.add.text(x, y, text, {
       fontFamily: 'monospace',
       fontSize: '13px',
       fontStyle: 'bold',
@@ -311,27 +376,27 @@ export class GameScene extends BaseScene {
     });
     label.setOrigin(0.5, 0.5);
 
-    btn.add([bg, label]);
-    btn.setSize(w, h);
-    btn.setInteractive(
-      new Phaser.Geom.Rectangle(-w / 2, -h / 2, w, h),
-      Phaser.Geom.Rectangle.Contains
-    );
+    const zone = this.add.zone(x - w / 2, y - h / 2, w, h);
+    zone.setOrigin(0, 0);
+    zone.setInteractive({ useHandCursor: true });
 
-    btn.on('pointerover', () => {
+    zone.on('pointerover', () => {
+      bg.clear();
       bg.fillStyle(accentColor, 0.35);
-      bg.fillRoundedRect(-w / 2, -h / 2, w, h, 6);
-      this.input.setDefaultCursor('pointer');
+      bg.fillRoundedRect(x - w / 2, y - h / 2, w, h, 6);
+      bg.lineStyle(1.5, accentColor, 1);
+      bg.strokeRoundedRect(x - w / 2, y - h / 2, w, h, 6);
     });
 
-    btn.on('pointerout', () => {
+    zone.on('pointerout', () => {
+      bg.clear();
       bg.fillStyle(0x0f172a, 0.9);
-      bg.fillRoundedRect(-w / 2, -h / 2, w, h, 6);
-      this.input.setDefaultCursor('default');
+      bg.fillRoundedRect(x - w / 2, y - h / 2, w, h, 6);
+      bg.lineStyle(1.5, accentColor, 0.9);
+      bg.strokeRoundedRect(x - w / 2, y - h / 2, w, h, 6);
     });
 
-    btn.on('pointerdown', () => {
-      this.input.setDefaultCursor('default');
+    zone.on('pointerdown', () => {
       onClick();
     });
   }

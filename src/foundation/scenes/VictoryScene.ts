@@ -1,4 +1,3 @@
-import Phaser from 'phaser';
 import { BaseScene } from './BaseScene';
 import { SceneKey, SceneDataPayload } from './SceneKey';
 import { PlatformManager } from '../platform';
@@ -49,7 +48,7 @@ export class VictoryScene extends BaseScene {
     );
 
     // Title
-    const title = this.add.text(modalX, modalY - 120, 'MAINFRAME BREACHED', {
+    const title = this.add.text(modalX, modalY - 120, 'LEVEL COMPLETED', {
       fontFamily: 'monospace',
       fontSize: '22px',
       fontStyle: 'bold',
@@ -61,7 +60,7 @@ export class VictoryScene extends BaseScene {
     const statsText = this.add.text(
       modalX,
       modalY - 50,
-      `SUBNET 0x0${this.level} COMPROMISED\nMOVES EXPENDED: ${this.moves}\nSTATUS: ROOT ACCESS GRANTED`,
+      `LEVEL ${this.level} CLEARED\nMOVES: ${this.moves}\nSTATUS: COMPLETE`,
       {
         fontFamily: 'monospace',
         fontSize: '14px',
@@ -90,7 +89,7 @@ export class VictoryScene extends BaseScene {
       this.scene.get(SceneKey.Game).scene.restart({ level: this.level + 1 });
     };
 
-    this.createActionButton(modalX, modalY + 80, 'NEXT SUBNET [ENTER]', 0x10b981, () => {
+    this.createActionButton(modalX, modalY + 80, 'NEXT LEVEL [ENTER]', 0x10b981, () => {
       proceedToNext();
     });
 
@@ -132,25 +131,19 @@ export class VictoryScene extends BaseScene {
 
     btn.add([bg, label]);
     btn.setSize(w, h);
-    btn.setInteractive(
-      new Phaser.Geom.Rectangle(-w / 2, -h / 2, w, h),
-      Phaser.Geom.Rectangle.Contains
-    );
+    btn.setInteractive({ useHandCursor: true });
 
     btn.on('pointerover', () => {
       bg.fillStyle(color, 0.4);
       bg.fillRoundedRect(-w / 2, -h / 2, w, h, 6);
-      this.input.setDefaultCursor('pointer');
     });
 
     btn.on('pointerout', () => {
       bg.fillStyle(0x0f172a, 0.9);
       bg.fillRoundedRect(-w / 2, -h / 2, w, h, 6);
-      this.input.setDefaultCursor('default');
     });
 
     btn.on('pointerdown', () => {
-      this.input.setDefaultCursor('default');
       onClick();
     });
   }

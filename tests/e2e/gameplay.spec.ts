@@ -13,7 +13,7 @@ test.describe('End-to-End Gameplay & Navigation Flow', () => {
 
     // Verify system title in header
     const titleEl = page.locator('#ui-game-title');
-    await expect(titleEl).toHaveText(/NEON CIRCUIT HACKER/);
+    await expect(titleEl).toHaveText(/2D GAME STARTER/);
 
     // Verify platform badge
     const badge = page.locator('#ui-platform-badge');

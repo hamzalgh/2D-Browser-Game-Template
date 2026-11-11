@@ -1,4 +1,3 @@
-import Phaser from 'phaser';
 import { BaseScene } from './BaseScene';
 import { SceneKey } from './SceneKey';
 import { AudioManager } from '../audio';
@@ -16,9 +15,9 @@ export class MainMenuScene extends BaseScene {
     this.createCyberBackground(width, height);
 
     // Title
-    const titleText = this.add.text(width / 2, height * 0.28, 'NEON CIRCUIT HACKER', {
+    const titleText = this.add.text(width / 2, height * 0.28, '2D GAME STARTER', {
       fontFamily: 'monospace',
-      fontSize: '42px',
+      fontSize: '44px',
       fontStyle: 'bold',
       color: '#38bdf8'
     });
@@ -28,7 +27,7 @@ export class MainMenuScene extends BaseScene {
     const subText = this.add.text(
       width / 2,
       height * 0.36,
-      '// SIGNAL CHAIN INFILTRATION PROTOCOL',
+      '// PRODUCTION-READY BROWSER GAME FOUNDATION',
       {
         fontFamily: 'monospace',
         fontSize: '15px',
@@ -38,15 +37,15 @@ export class MainMenuScene extends BaseScene {
     subText.setOrigin(0.5, 0.5);
 
     // Primary Action Buttons
-    this.createMenuButton(width / 2, height * 0.52, 'INITIALIZE BREACH', () => {
+    this.createMenuButton(width / 2, height * 0.52, 'START GAME', () => {
       this.transitionTo(SceneKey.Game, { data: { level: 1 } });
     });
 
-    this.createMenuButton(width / 2, height * 0.63, 'DAILY NETWORK SEED', () => {
+    this.createMenuButton(width / 2, height * 0.63, 'DAILY CHALLENGE', () => {
       this.transitionTo(SceneKey.Game, { data: { level: 'daily' } });
     });
 
-    this.createMenuButton(width / 2, height * 0.74, 'SYSTEM SETTINGS', () => {
+    this.createMenuButton(width / 2, height * 0.74, 'SETTINGS', () => {
       this.openOverlay(SceneKey.Pause, { isSettingsOnly: true });
     });
 
@@ -54,7 +53,7 @@ export class MainMenuScene extends BaseScene {
     const verText = this.add.text(
       width / 2,
       height * 0.92,
-      'v1.0.0-foundation // CrazyGames & Y8 Ready',
+      'v0.1.0 // CrazyGames & Y8 Ready',
       {
         fontFamily: 'monospace',
         fontSize: '12px',
@@ -86,10 +85,7 @@ export class MainMenuScene extends BaseScene {
 
     btnContainer.add([bg, label]);
     btnContainer.setSize(btnWidth, btnHeight);
-    btnContainer.setInteractive(
-      new Phaser.Geom.Rectangle(-btnWidth / 2, -btnHeight / 2, btnWidth, btnHeight),
-      Phaser.Geom.Rectangle.Contains
-    );
+    btnContainer.setInteractive({ useHandCursor: true });
 
     btnContainer.on('pointerover', () => {
       bg.clear();
@@ -98,7 +94,6 @@ export class MainMenuScene extends BaseScene {
       bg.fillStyle(0x0284c7, 0.4);
       bg.fillRoundedRect(-btnWidth / 2, -btnHeight / 2, btnWidth, btnHeight, 6);
       label.setColor('#ffffff');
-      this.input.setDefaultCursor('pointer');
     });
 
     btnContainer.on('pointerout', () => {
@@ -108,11 +103,9 @@ export class MainMenuScene extends BaseScene {
       bg.fillStyle(0x0f172a, 0.85);
       bg.fillRoundedRect(-btnWidth / 2, -btnHeight / 2, btnWidth, btnHeight, 6);
       label.setColor('#e0f2fe');
-      this.input.setDefaultCursor('default');
     });
 
     btnContainer.on('pointerdown', () => {
-      this.input.setDefaultCursor('default');
       AudioManager.getInstance().playSfx('click');
       onClick();
     });

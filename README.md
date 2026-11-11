@@ -1,4 +1,4 @@
-# Neon Circuit Hacker — Reusable 2D Browser Game Foundation
+# 2D Game Starter Release v0.1.0 — Reusable 2D Browser Game Foundation
 
 A production-ready, modular 2D browser game foundation engineered with **Phaser 4**, **TypeScript**, **Vite**, **Tailwind CSS v4**, and **pnpm**. Designed specifically for publishing high-performance HTML5 games to major web portals including **CrazyGames** and **Y8**, supporting both desktop and mobile viewports with zero third-party UI framework bloat (no React, no Bootstrap, no backend required).
 
@@ -39,8 +39,6 @@ A production-ready, modular 2D browser game foundation engineered with **Phaser 
 │   │   ├── responsive/            # Canvas scaling, safe areas & orientation guard
 │   │   ├── scenes/                # Scene manager, lifecycle hooks & modal stack
 │   │   └── storage/               # Save schemas, migrations & storage adapters
-│   ├── game/                      # Example game implementation (Neon Circuit Hacker)
-│   │   └── scenes/                # Boot, Preloader, MainMenu, Game, Pause, Victory
 │   ├── index.html                 # App shell, meta tags, and HTML overlay containers
 │   ├── main.ts                    # Application bootstrap & foundation wiring
 │   └── style.css                  # Tailwind CSS v4 configuration
@@ -79,9 +77,9 @@ pnpm preview
 
 You can test specific platform adapters locally without modifying code:
 
-- **Mock Adapter (Default)**: `http://localhost:5173/?mock=true`
-- **CrazyGames Adapter**: `http://localhost:5173/?platform=crazygames`
-- **Y8 Adapter**: `http://localhost:5173/?platform=y8`
+- **Mock Adapter (Default)**: `http://localhost:3000/?mock=true`
+- **CrazyGames Adapter**: `http://localhost:3000/?platform=crazygames`
+- **Y8 Adapter**: `http://localhost:3000/?platform=y8`
 
 ---
 

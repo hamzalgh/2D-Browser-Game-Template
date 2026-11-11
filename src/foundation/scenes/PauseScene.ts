@@ -1,4 +1,3 @@
-import Phaser from 'phaser';
 import { BaseScene } from './BaseScene';
 import { SceneKey, SceneDataPayload } from './SceneKey';
 
@@ -47,7 +46,7 @@ export class PauseScene extends BaseScene {
     );
 
     // Header title
-    const headerTitle = this.isSettingsOnly ? 'SYSTEM CONFIGURATION' : 'SYSTEM PAUSED';
+    const headerTitle = this.isSettingsOnly ? 'SETTINGS' : 'PAUSED';
     const title = this.add.text(modalX, modalY - modalHeight / 2 + 36, headerTitle, {
       fontFamily: 'monospace',
       fontSize: '18px',
@@ -60,7 +59,7 @@ export class PauseScene extends BaseScene {
     const spacing = 50;
 
     if (!this.isSettingsOnly) {
-      this.createModalButton(modalX, currentY, 'RESUME RUN [ESC]', 0x0284c7, () => {
+      this.createModalButton(modalX, currentY, 'RESUME [ESC]', 0x0284c7, () => {
         this.closeOverlay();
       });
       currentY += spacing;
@@ -72,7 +71,7 @@ export class PauseScene extends BaseScene {
       currentY += spacing;
     }
 
-    this.createModalButton(modalX, currentY, 'RETURN TO MAINFRAME', 0xe11d48, () => {
+    this.createModalButton(modalX, currentY, 'MAIN MENU', 0xe11d48, () => {
       this.closeOverlay();
       this.scene.stop(SceneKey.Game);
       this.scene.start(SceneKey.MainMenu);
@@ -123,25 +122,19 @@ export class PauseScene extends BaseScene {
 
     btn.add([bg, label]);
     btn.setSize(w, h);
-    btn.setInteractive(
-      new Phaser.Geom.Rectangle(-w / 2, -h / 2, w, h),
-      Phaser.Geom.Rectangle.Contains
-    );
+    btn.setInteractive({ useHandCursor: true });
 
     btn.on('pointerover', () => {
       bg.fillStyle(color, 0.4);
       bg.fillRoundedRect(-w / 2, -h / 2, w, h, 6);
-      this.input.setDefaultCursor('pointer');
     });
 
     btn.on('pointerout', () => {
       bg.fillStyle(0x0f172a, 0.9);
       bg.fillRoundedRect(-w / 2, -h / 2, w, h, 6);
-      this.input.setDefaultCursor('default');
     });
 
     btn.on('pointerdown', () => {
-      this.input.setDefaultCursor('default');
       onClick();
     });
   }
